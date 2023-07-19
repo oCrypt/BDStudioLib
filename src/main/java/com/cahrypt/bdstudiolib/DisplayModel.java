@@ -1,7 +1,9 @@
 package com.cahrypt.bdstudiolib;
 
+import com.cahrypt.bdstudiolib.schematic.DisplayEntitySchematic;
 import org.bukkit.Location;
 import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Display;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -15,13 +17,11 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Represents a {@link org.bukkit.entity.BlockDisplay} model composed of multiple {@link DisplayEntitySchematic}s.
+ * Represents a {@link org.bukkit.entity.Display} model composed of multiple {@link DisplayEntitySchematic}s.
  * @param name The name of the model.
  * @param schematics The list of {@link DisplayEntitySchematic}s that make up the model.
- *
- * @author oCrypt
  */
-public record DisplayModel(String name, List<DisplayEntitySchematic> schematics) {
+public record DisplayModel(String name, List<DisplayEntitySchematic<?>> schematics) {
 
     /**
      * Creates a {@link DisplayModel} from a BDStudio file.
@@ -55,7 +55,7 @@ public record DisplayModel(String name, List<DisplayEntitySchematic> schematics)
 
         uglyJson = uglyJson.substring(1, uglyJson.length() - 1);
 
-        return DisplayModelGsonUtil.parseJson(uglyJson);
+        return DisplayModelGsonUtil.getGsonManager().getGson().fromJson(uglyJson, DisplayModel.class);
     }
 
     /**
@@ -63,12 +63,12 @@ public record DisplayModel(String name, List<DisplayEntitySchematic> schematics)
      * @param location The location to spawn the model at.
      * @param pitchRotationRadians The pitch rotation in radians.
      * @param yawRotationRadians The yaw rotation in radians.
-     * @return The list of {@link BlockDisplay}s that make up the model.
+     * @return The list of {@link Display}s that make up the model.
      */
-    public List<BlockDisplay> spawn(Location location, double pitchRotationRadians, double yawRotationRadians) {
-        List<BlockDisplay> involvedDisplays = new ArrayList<>();
+    public List<Display> spawn(Location location, double pitchRotationRadians, double yawRotationRadians) {
+        List<Display> involvedDisplays = new ArrayList<>();
 
-        for (DisplayEntitySchematic schematic : schematics) {
+        for (DisplayEntitySchematic<?> schematic : schematics) {
             involvedDisplays.add(schematic.create(location, pitchRotationRadians, yawRotationRadians));
         }
 
