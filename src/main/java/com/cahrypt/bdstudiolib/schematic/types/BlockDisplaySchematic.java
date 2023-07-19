@@ -18,6 +18,7 @@ public class BlockDisplaySchematic extends DisplayEntitySchematic<BlockDisplay> 
     public BlockDisplay create(Location location) {
         BlockDisplay blockDisplay = location.getWorld().spawn(location, BlockDisplay.class);
         blockDisplay.setBlock(blockData);
+
         return blockDisplay;
     }
 }
