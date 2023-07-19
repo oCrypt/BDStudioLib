@@ -1,0 +1,6 @@
+name: BDStudioLib
+version: '${project.version}'
+main: com.cahrypt.bdstudiolib.BDStudioLib
+api-version: 1.20
+authors: [ cahrypt ]
+description: A simple library for uploading .bdstudio files onto minecraft servers
