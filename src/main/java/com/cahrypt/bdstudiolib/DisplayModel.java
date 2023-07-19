@@ -1,6 +1,7 @@
 package com.cahrypt.bdstudiolib;
 
 import org.bukkit.Location;
+import org.bukkit.entity.BlockDisplay;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -8,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -61,10 +63,15 @@ public record DisplayModel(String name, List<DisplayEntitySchematic> schematics)
      * @param location The location to spawn the model at.
      * @param pitchRotationRadians The pitch rotation in radians.
      * @param yawRotationRadians The yaw rotation in radians.
+     * @return The list of {@link BlockDisplay}s that make up the model.
      */
-    public void spawn(Location location, double pitchRotationRadians, double yawRotationRadians) {
+    public List<BlockDisplay> spawn(Location location, double pitchRotationRadians, double yawRotationRadians) {
+        List<BlockDisplay> involvedDisplays = new ArrayList<>();
+
         for (DisplayEntitySchematic schematic : schematics) {
-            schematic.create(location, pitchRotationRadians, yawRotationRadians);
+            involvedDisplays.add(schematic.create(location, pitchRotationRadians, yawRotationRadians));
         }
+
+        return involvedDisplays;
     }
 }
