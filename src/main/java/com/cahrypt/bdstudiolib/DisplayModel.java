@@ -1,9 +1,11 @@
 package com.cahrypt.bdstudiolib;
 
-import com.cahrypt.bdstudiolib.schematic.DisplayEntitySchematic;
+
+import com.cahrypt.bdstudiolib.collection.CollectionComponent;
+import com.cahrypt.bdstudiolib.collection.types.DisplayCollection;
 import org.bukkit.Location;
-import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
+import org.joml.Matrix4f;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -11,17 +13,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-/**
- * Represents a {@link org.bukkit.entity.Display} model composed of multiple {@link DisplayEntitySchematic}s.
- * @param name The name of the model.
- * @param schematics The list of {@link DisplayEntitySchematic}s that make up the model.
- */
-public record DisplayModel(String name, List<DisplayEntitySchematic<?>> schematics) {
+public record DisplayModel(DisplayCollection collection) {
 
     /**
      * Creates a {@link DisplayModel} from a BDStudio file.
@@ -55,23 +53,37 @@ public record DisplayModel(String name, List<DisplayEntitySchematic<?>> schemati
 
         uglyJson = uglyJson.substring(1, uglyJson.length() - 1);
 
-        return DisplayModelGsonUtil.getGsonManager().getGson().fromJson(uglyJson, DisplayModel.class);
+        return new DisplayModel(DisplayModelGsonUtil.getGson().fromJson(uglyJson, DisplayCollection.class));
+    }
+
+    private Map<CollectionComponent<?>, List<Display>> buildCollection(DisplayCollection collection, Location location, Matrix4f basis) {
+        Map<CollectionComponent<?>, List<Display>> displays = new HashMap<>();
+
+        Matrix4f collectionBasis = collection.getLocalTransformation();
+        Matrix4f newBasis = new Matrix4f(basis).mul(collectionBasis);
+
+        for (CollectionComponent<Display> component : collection.getComponents()) {
+            if (component instanceof DisplayCollection) {
+                displays.putAll(buildCollection((DisplayCollection) component, location, newBasis));
+                continue;
+            }
+
+            Matrix4f componentBasis = component.getLocalTransformation();
+            List<Display> componentDisplays = component.getDisplays(location);
+
+            componentDisplays.forEach(display -> display.setTransformationMatrix(new Matrix4f(newBasis).mul(componentBasis)));
+            displays.put(component, componentDisplays);
+        }
+
+        return displays;
     }
 
     /**
-     * Spawns the {@link DisplayModel} at the specified location with the specified rotation in radians. Degrees are for the weak.
-     * @param location The location to spawn the model at.
-     * @param pitchRotationRadians The pitch rotation in radians.
-     * @param yawRotationRadians The yaw rotation in radians.
-     * @return The list of {@link Display}s that make up the model.
+     * Spawns the {@link DisplayModel} at the given location.
+     * @param location The location to spawn the {@link DisplayModel} at.
+     * @return A {@link Map} of {@link CollectionComponent}s to {@link Display}s.
      */
-    public List<Display> spawn(Location location, double pitchRotationRadians, double yawRotationRadians) {
-        List<Display> involvedDisplays = new ArrayList<>();
-
-        for (DisplayEntitySchematic<?> schematic : schematics) {
-            involvedDisplays.add(schematic.create(location, pitchRotationRadians, yawRotationRadians));
-        }
-
-        return involvedDisplays;
+    public Map<CollectionComponent<?>, List<Display>> spawn(Location location) {
+        return buildCollection(collection, location, collection.getLocalTransformation());
     }
 }
