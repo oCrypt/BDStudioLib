@@ -5,6 +5,7 @@ import com.cahrypt.bdstudiolib.collection.CollectionComponent;
 import com.cahrypt.bdstudiolib.collection.types.DisplayCollection;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 import java.io.BufferedReader;
@@ -35,6 +36,13 @@ public record DisplayModel(DisplayCollection collection) {
         byte[] compressedData = Base64.getDecoder().decode(base64EncodedLine);
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(compressedData);
+        String uglyJson = getUglyString(inputStream);
+
+        return new DisplayModel(DisplayModelGsonUtil.getGson().fromJson(uglyJson, DisplayCollection.class));
+    }
+
+    @NotNull
+    private static String getUglyString(ByteArrayInputStream inputStream) throws IOException {
         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -52,8 +60,7 @@ public record DisplayModel(DisplayCollection collection) {
         outputStream.close();
 
         uglyJson = uglyJson.substring(1, uglyJson.length() - 1);
-
-        return new DisplayModel(DisplayModelGsonUtil.getGson().fromJson(uglyJson, DisplayCollection.class));
+        return uglyJson;
     }
 
     private Map<CollectionComponent<?>, List<Display>> buildCollection(DisplayCollection collection, Location location, Matrix4f basis) {
