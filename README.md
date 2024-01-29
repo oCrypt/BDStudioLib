@@ -1,6 +1,31 @@
 # Installation
-Visit the BDStudioLib [releases](https://github.com/oCrypt/BDStudioLib/releases) page and download the version specific to your Minecraft server version.
+Visit the BDStudioLib [releases](https://github.com/oCrypt/BDStudioLib/releases) page and download the version specific to your Minecraft server version and place it in your plugins folder.
 (NOTE: Currently only a 1.20.4 build is provided.)
+
+## Adding BDStudioLib as a dependency to your plugin:
+
+### Maven:
+
+Repository:
+```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+```
+
+Dependency:
+```xml
+<dependency>
+  <groupId>com.github.oCrypt</groupId>
+  <artifactId>BDStudioLib</artifactId>
+  <version>1.1</version>
+</dependency>
+```
+
+For additional information visit https://jitpack.io/#oCrypt/BDStudioLib.
 
 # Usage
 
