@@ -1,7 +1,16 @@
 package com.cahrypt.bdstudiolib;
 
+import com.cahrypt.bdstudiolib.adapter.types.BlockComponentAdapter;
+import com.cahrypt.bdstudiolib.adapter.types.DisplayCollectionAdapter;
+import com.cahrypt.bdstudiolib.adapter.types.ItemComponentAdapter;
+import com.cahrypt.bdstudiolib.adapter.types.TextComponentAdapter;
 import com.cahrypt.bdstudiolib.collection.CollectionComponent;
+import com.cahrypt.bdstudiolib.collection.types.BlockDisplayComponent;
 import com.cahrypt.bdstudiolib.collection.types.DisplayCollection;
+import com.cahrypt.bdstudiolib.collection.types.ItemDisplayComponent;
+import com.cahrypt.bdstudiolib.collection.types.TextDisplayComponent;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +30,17 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 public record DisplayModel(DisplayCollection collection) {
+    private static final Gson GSON = new GsonBuilder()
+            .disableHtmlEscaping()
+            .serializeNulls()
+            .setPrettyPrinting()
+            .enableComplexMapKeySerialization()
+            .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
+            .registerTypeAdapter(DisplayCollection.class, new DisplayCollectionAdapter())
+            .registerTypeAdapter(BlockDisplayComponent.class, new BlockComponentAdapter())
+            .registerTypeAdapter(ItemDisplayComponent.class, new ItemComponentAdapter())
+            .registerTypeAdapter(TextDisplayComponent.class, new TextComponentAdapter())
+            .create();
 
     /**
      * Creates a {@link DisplayModel} from a BDStudio file.
@@ -37,7 +58,7 @@ public record DisplayModel(DisplayCollection collection) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(compressedData);
         String uglyJson = getUglyString(inputStream);
 
-        return new DisplayModel(BDStudioLib.getInstance().getGson().fromJson(uglyJson, DisplayCollection.class));
+        return new DisplayModel(GSON.fromJson(uglyJson, DisplayCollection.class));
     }
 
     @NotNull
