@@ -1,13 +1,11 @@
 package com.cahrypt.bdstudiolib.adapter.types;
 
-import com.cahrypt.bdstudiolib.DisplayModelGsonUtil;
 import com.cahrypt.bdstudiolib.adapter.ComponentAdapter;
 import com.cahrypt.bdstudiolib.collection.CollectionComponent;
 import com.cahrypt.bdstudiolib.collection.types.BlockDisplayComponent;
 import com.cahrypt.bdstudiolib.collection.types.DisplayCollection;
 import com.cahrypt.bdstudiolib.collection.types.ItemDisplayComponent;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -27,8 +25,6 @@ public class DisplayCollectionAdapter implements ComponentAdapter<CollectionComp
             .put("isItemDisplay", ItemDisplayComponent.class)
             .put("isCollection", DisplayCollection.class)
             .build();
-
-    private static final Gson GSON = DisplayModelGsonUtil.getGson();
 
     private Class<? extends CollectionComponent<?>> getIdentifier(JsonObject object) {
         for (Map.Entry<String, Class<? extends CollectionComponent<?>>> entry : SCHEMATIC_IDENTIFIER_MAP.entrySet()) {
@@ -52,7 +48,7 @@ public class DisplayCollectionAdapter implements ComponentAdapter<CollectionComp
         }
 
         if (schematicClass != DisplayCollection.class) {
-            return GSON.fromJson(jsonObject, schematicClass);
+            return context.deserialize(jsonObject, schematicClass);
         }
 
         List<CollectionComponent<Display>> components = new ArrayList<>();
@@ -60,7 +56,7 @@ public class DisplayCollectionAdapter implements ComponentAdapter<CollectionComp
         JsonArray array = jsonObject.getAsJsonArray("children");
 
         for (JsonElement element : array) {
-            components.add(GSON.fromJson(element.getAsJsonObject(), DisplayCollection.class));
+            components.add(context.deserialize(element, DisplayCollection.class));
         }
 
         return new DisplayCollection(collectionTransformation, schematicName, components);

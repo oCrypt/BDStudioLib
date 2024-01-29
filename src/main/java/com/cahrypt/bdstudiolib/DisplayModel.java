@@ -38,7 +38,7 @@ public record DisplayModel(DisplayCollection collection) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(compressedData);
         String uglyJson = getUglyString(inputStream);
 
-        return new DisplayModel(DisplayModelGsonUtil.getGson().fromJson(uglyJson, DisplayCollection.class));
+        return new DisplayModel(BDStudioLib.getInstance().getGson().fromJson(uglyJson, DisplayCollection.class));
     }
 
     @NotNull

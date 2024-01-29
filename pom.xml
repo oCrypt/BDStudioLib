@@ -6,7 +6,7 @@
 
     <groupId>com.cahrypt</groupId>
     <artifactId>BDStudioLib</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <name>BDStudioLib</name>
@@ -68,13 +68,8 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.cahrypt.gsonutils</groupId>
-            <artifactId>GsonUtils</artifactId>
-            <version>1.0</version>
         </dependency>
     </dependencies>
 </project>
