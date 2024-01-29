@@ -1,6 +1,5 @@
 package com.cahrypt.bdstudiolib;
 
-
 import com.cahrypt.bdstudiolib.collection.CollectionComponent;
 import com.cahrypt.bdstudiolib.collection.types.DisplayCollection;
 import org.bukkit.Location;
