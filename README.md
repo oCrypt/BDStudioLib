@@ -21,7 +21,7 @@ Dependency:
 <dependency>
   <groupId>com.github.oCrypt</groupId>
   <artifactId>BDStudioLib</artifactId>
-  <version>1.1</version>
+  <version>v1.2</version>
 </dependency>
 ```
 
