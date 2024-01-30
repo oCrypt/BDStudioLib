@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 public record DisplayModel(DisplayCollection collection) {
+    private static final Matrix4f IDENTITY = new Matrix4f();
     private static final Gson GSON = new GsonBuilder()
             .disableHtmlEscaping()
             .serializeNulls()
@@ -83,22 +84,22 @@ public record DisplayModel(DisplayCollection collection) {
         return uglyJson;
     }
 
-    private Map<CollectionComponent<?>, List<Display>> buildCollection(DisplayCollection collection, Location location, Matrix4f basis) {
+    private Map<CollectionComponent<?>, List<Display>> buildCollection(DisplayCollection collection, Location location, Matrix4f transform) {
         Map<CollectionComponent<?>, List<Display>> displays = new HashMap<>();
 
-        Matrix4f collectionBasis = collection.getLocalTransformation();
-        Matrix4f newBasis = new Matrix4f(basis).mul(collectionBasis);
+        Matrix4f collectionTransform = collection.getLocalTransformation();
+        Matrix4f newTransform = new Matrix4f(transform).mul(collectionTransform);
 
         for (CollectionComponent<Display> component : collection.getComponents()) {
-            if (component instanceof DisplayCollection) {
-                displays.putAll(buildCollection((DisplayCollection) component, location, newBasis));
+            if (component instanceof DisplayCollection displayCollection) {
+                displays.putAll(buildCollection(displayCollection, location, newTransform));
                 continue;
             }
 
-            Matrix4f componentBasis = component.getLocalTransformation();
+            Matrix4f componentTransform = component.getLocalTransformation();
             List<Display> componentDisplays = component.getDisplays(location);
 
-            componentDisplays.forEach(display -> display.setTransformationMatrix(new Matrix4f(newBasis).mul(componentBasis)));
+            componentDisplays.forEach(display -> display.setTransformationMatrix(new Matrix4f(newTransform).mul(componentTransform)));
             displays.put(component, componentDisplays);
         }
 
@@ -111,6 +112,6 @@ public record DisplayModel(DisplayCollection collection) {
      * @return A {@link Map} of {@link CollectionComponent}s to {@link Display}s.
      */
     public Map<CollectionComponent<?>, List<Display>> spawn(Location location) {
-        return buildCollection(collection, location, collection.getLocalTransformation());
+        return buildCollection(collection, location, IDENTITY);
     }
 }
