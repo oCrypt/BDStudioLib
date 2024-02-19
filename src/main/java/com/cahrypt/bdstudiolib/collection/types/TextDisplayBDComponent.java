@@ -1,22 +1,20 @@
 package com.cahrypt.bdstudiolib.collection.types;
 
-import com.cahrypt.bdstudiolib.collection.CollectionComponent;
-import net.kyori.adventure.text.Component;
+import com.cahrypt.bdstudiolib.collection.SingletonBDComponent;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.TextDisplay;
 import org.joml.Matrix4f;
 
-import java.util.List;
+// TODO this should not be abstract lmao
+public abstract class TextDisplayBDComponent extends SingletonBDComponent<TextDisplay> {
 
-public abstract class TextDisplayComponent extends CollectionComponent<TextDisplay> {
-
-    public TextDisplayComponent(Matrix4f localTransformation) {
-        super(localTransformation);
+    public TextDisplayBDComponent(String name, Matrix4f localTransformation) {
+        super(name, localTransformation);
     }
 
     @Override
-    public List<TextDisplay> getDisplays(Location location) {
+    public TextDisplay getDisplay(Location location) {
         TextDisplay textDisplay = location.getWorld().spawn(location, TextDisplay.class);
         textDisplay.text(getText());
         textDisplay.setAlignment(getAlignment());
@@ -29,10 +27,10 @@ public abstract class TextDisplayComponent extends CollectionComponent<TextDispl
         // no background opacity function??
         textDisplay.setSeeThrough(isSeeThrough());
 
-        return List.of(textDisplay);
+        return textDisplay;
     }
 
-    public abstract Component getText();
+    public abstract net.kyori.adventure.text.Component getText();
 
     public abstract TextDisplay.TextAlignment getAlignment();
 

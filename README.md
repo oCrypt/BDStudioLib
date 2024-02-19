@@ -34,12 +34,13 @@ For additional information visit https://jitpack.io/#oCrypt/BDStudioLib.
 File modelFile = new File("path"); // ensure that file ends with .bdstudio
 
 try {
-  DisplayModel model = DisplayModel.fromBDStudioFile(modelFile);
+  DisplayModelSchematic model = DisplayModelSchematic.fromBDStudioFile(modelFile);
 } catch (IOException e) {
   // handle exception
 }
 ```
 
 ### Spawning & Manipulation:
-To spawn the model at a given location, simply call the DisplayModel#spawn(location);
-DisplayModel#collection() will allow you to view all the components of the model and also allow for some freedom of modification
+To spawn the schematic at a given location, simply call the DisplayModelSchematic#spawn(location);
+DisplayModelSchematic#collection() will allow you to view all the BDComponents of the model.
+Additionally, you will also be able to access all the Matrix4f transformations and modify them freely.

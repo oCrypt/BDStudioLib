@@ -1,7 +1,7 @@
 package com.cahrypt.bdstudiolib.adapter.types;
 
 import com.cahrypt.bdstudiolib.adapter.ComponentAdapter;
-import com.cahrypt.bdstudiolib.collection.types.TextDisplayComponent;
+import com.cahrypt.bdstudiolib.collection.types.TextDisplayBDComponent;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,10 +17,10 @@ import org.bukkit.entity.TextDisplay;
 
 import java.lang.reflect.Type;
 
-public class TextComponentAdapter implements ComponentAdapter<TextDisplayComponent> {
+public class TextComponentAdapter implements ComponentAdapter<TextDisplayBDComponent> {
 
     @Override
-    public TextDisplayComponent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public TextDisplayBDComponent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject object = json.getAsJsonObject();
 
         String text = deserializeName(object);
@@ -54,7 +54,8 @@ public class TextComponentAdapter implements ComponentAdapter<TextDisplayCompone
 
         builder.style(styleBuilder.build());
 
-        return new TextDisplayComponent(deserializeTransformation(object)) {
+        // TODO stupid - just build it into TextDisplayBDComponent class
+        return new TextDisplayBDComponent(text, deserializeTransforms(object, context)) {
             @Override
             public Component getText() {
                 return builder.build();

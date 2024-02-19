@@ -6,7 +6,7 @@
 
     <groupId>com.cahrypt</groupId>
     <artifactId>BDStudioLib</artifactId>
-    <version>1.2</version>
+    <version>1.21</version>
     <packaging>jar</packaging>
 
     <name>BDStudioLib</name>

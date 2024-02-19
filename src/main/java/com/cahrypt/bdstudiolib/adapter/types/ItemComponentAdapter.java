@@ -1,7 +1,7 @@
 package com.cahrypt.bdstudiolib.adapter.types;
 
 import com.cahrypt.bdstudiolib.adapter.ComponentAdapter;
-import com.cahrypt.bdstudiolib.collection.types.ItemDisplayComponent;
+import com.cahrypt.bdstudiolib.collection.types.ItemDisplayBDComponent;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -13,14 +13,14 @@ import org.joml.Matrix4f;
 
 import java.lang.reflect.Type;
 
-public class ItemComponentAdapter implements ComponentAdapter<ItemDisplayComponent> {
+public class ItemComponentAdapter implements ComponentAdapter<ItemDisplayBDComponent> {
 
     @Override
-    public ItemDisplayComponent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public ItemDisplayBDComponent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject object = json.getAsJsonObject();
 
         String name = deserializeName(object);
-        Matrix4f transformation = deserializeTransformation(object);
+        Matrix4f transformation = deserializeTransforms(object, context);
 
         int endIndex = name.indexOf("[");
         Material material = Material.getMaterial(name.substring(0, endIndex == -1 ? 0 : endIndex).toUpperCase());
@@ -38,6 +38,6 @@ public class ItemComponentAdapter implements ComponentAdapter<ItemDisplayCompone
         } catch (NumberFormatException ignored) {
         }
 
-        return new ItemDisplayComponent(transformation, new ItemStack(material));
+        return new ItemDisplayBDComponent(name, transformation, new ItemStack(material));
     }
 }
