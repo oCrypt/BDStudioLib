@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class DisplayCollectionAdapter implements ComponentAdapter<BDComponent<? extends Display>> {
+public class CollectionAdapter implements ComponentAdapter<BDComponent<? extends Display>> {
     public static final String BLOCK_DISPLAY_IDENTIFIER = "isBlockDisplay";
     public static final String ITEM_DISPLAY_IDENTIFIER = "isItemDisplay";
     public static final String COLLECTION_IDENTIFIER = "isCollection";

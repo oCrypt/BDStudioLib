@@ -1,7 +1,7 @@
 package com.cahrypt.bdstudiolib;
 
 import com.cahrypt.bdstudiolib.adapter.types.BlockComponentAdapter;
-import com.cahrypt.bdstudiolib.adapter.types.DisplayCollectionAdapter;
+import com.cahrypt.bdstudiolib.adapter.types.CollectionAdapter;
 import com.cahrypt.bdstudiolib.adapter.types.ItemComponentAdapter;
 import com.cahrypt.bdstudiolib.adapter.types.Matrix4fAdapter;
 import com.cahrypt.bdstudiolib.adapter.types.TextComponentAdapter;
@@ -10,10 +10,12 @@ import com.cahrypt.bdstudiolib.collection.types.BlockDisplayBDComponent;
 import com.cahrypt.bdstudiolib.collection.types.CollectionBDComponent;
 import com.cahrypt.bdstudiolib.collection.types.ItemDisplayBDComponent;
 import com.cahrypt.bdstudiolib.collection.types.TextDisplayBDComponent;
+import com.cahrypt.bdstudiolib.utils.BDStudioLibKeys;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
@@ -26,7 +28,9 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -39,7 +43,7 @@ public record DisplayModelSchematic(CollectionBDComponent collection) {
             .setPrettyPrinting()
             .enableComplexMapKeySerialization()
             .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
-            .registerTypeAdapter(CollectionBDComponent.class, new DisplayCollectionAdapter())
+            .registerTypeAdapter(CollectionBDComponent.class, new CollectionAdapter())
             .registerTypeAdapter(BlockDisplayBDComponent.class, new BlockComponentAdapter())
             .registerTypeAdapter(ItemDisplayBDComponent.class, new ItemComponentAdapter())
             .registerTypeAdapter(TextDisplayBDComponent.class, new TextComponentAdapter())
@@ -87,23 +91,29 @@ public record DisplayModelSchematic(CollectionBDComponent collection) {
         return uglyJson;
     }
 
-    private Set<Display> buildCollection(CollectionBDComponent collection, Location location, Matrix4f transform) {
-        Set<Display> displays = new HashSet<>();
+    private Map<String, Set<Display>> buildCollection(CollectionBDComponent collection, Location location, Matrix4f transform, String name) {
+        Map<String, Set<Display>> displays = new HashMap<>();
 
         Matrix4f collectionTransform = collection.getLocalTransformation();
         Matrix4f newTransform = new Matrix4f(transform).mul(collectionTransform);
 
+        String newPath = name + "." + collection.getName();
+
         for (BDComponent<Display> BDComponent : collection.getComponents()) {
             if (BDComponent instanceof CollectionBDComponent displayCollectionComponent) {
-                displays.addAll(buildCollection(displayCollectionComponent, location, newTransform));
+                displays.putAll(buildCollection(displayCollectionComponent, location, newTransform, newPath));
                 continue;
             }
 
             Matrix4f componentTransform = BDComponent.getLocalTransformation();
             Collection<Display> componentDisplays = BDComponent.getDisplays(location);
 
-            componentDisplays.forEach(display -> display.setTransformationMatrix(new Matrix4f(newTransform).mul(componentTransform)));
-            displays.addAll(componentDisplays);
+            componentDisplays.forEach(display -> {
+                display.setTransformationMatrix(new Matrix4f(newTransform).mul(componentTransform));
+                display.getPersistentDataContainer().set(BDStudioLibKeys.PATH, PersistentDataType.STRING, newPath);
+            });
+
+            displays.computeIfAbsent(newPath, k -> new HashSet<>()).addAll(componentDisplays);
         }
 
         return displays;
@@ -112,9 +122,27 @@ public record DisplayModelSchematic(CollectionBDComponent collection) {
     /**
      * Spawns the {@link DisplayModelSchematic} at the given location.
      * @param location The location to spawn the {@link DisplayModelSchematic} at.
-     * @return A {@link Map} of {@link BDComponent}s to {@link Display}s.
+     * @return The {@link DisplayModel} that was spawned.
      */
-    public Set<Display> spawn(Location location) {
-        return buildCollection(collection, location, IDENTITY);
+    public DisplayModel spawn(String name, Location location) {
+        Map<String, Set<Display>> displays = buildCollection(collection, location, IDENTITY, name.replace(".", "_"));
+
+        Iterator<Display> iterator = displays.values()
+                .stream()
+                .flatMap(Set::stream)
+                .iterator();
+
+        Display firstDisplay = iterator.next();
+        String prevUUID = firstDisplay.getUniqueId().toString();
+
+        while (iterator.hasNext()) {
+            Display display = iterator.next();
+            display.getPersistentDataContainer().set(BDStudioLibKeys.SIBLING, PersistentDataType.STRING, prevUUID);
+            prevUUID = display.getUniqueId().toString();
+        }
+
+        firstDisplay.getPersistentDataContainer().set(BDStudioLibKeys.SIBLING, PersistentDataType.STRING, prevUUID);
+
+        return new DisplayModel(displays);
     }
 }
