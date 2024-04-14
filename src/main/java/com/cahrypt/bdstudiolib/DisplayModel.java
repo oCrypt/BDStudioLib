@@ -4,7 +4,6 @@ import com.cahrypt.bdstudiolib.utils.BDStudioLibKeys;
 import org.bukkit.entity.Display;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.Transformation;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public record DisplayModel(Map<String, Set<Display>> displays) {
 
@@ -60,19 +58,18 @@ public record DisplayModel(Map<String, Set<Display>> displays) {
         return displays.containsKey(path);
     }
 
-    public void transform(String path, Function<Transformation, Transformation> transformationFunction) {
-        Set<Display> displays = getDisplays(path);
-
-        if (displays == null) {
-            return;
+    public void rotateDisplays(String path, float yaw, float pitch) {
+        Set<Display> displaySet = displays.get(path);
+        if (displaySet == null) {
+            throw new IllegalArgumentException("No displays found for path: " + path);
         }
 
-        for (Display display : displays) {
-            display.setTransformation(transformationFunction.apply(display.getTransformation()));
-        }
+        displaySet.forEach(display -> display.setRotation(display.getYaw() + yaw, display.getPitch() + pitch));
     }
 
-    public void transform(Function<Transformation, Transformation> transformationFunction) {
-        consumeDisplays(display -> display.setTransformation(transformationFunction.apply(display.getTransformation())));
+    public void rotateDisplays(float yaw, float pitch) {
+        for (Set<Display> displaySet : displays.values()) {
+            displaySet.forEach(display -> display.setRotation(display.getYaw() + yaw, display.getPitch() + pitch));
+        }
     }
 }
