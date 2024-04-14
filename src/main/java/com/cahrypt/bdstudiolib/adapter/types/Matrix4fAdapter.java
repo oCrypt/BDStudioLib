@@ -42,7 +42,7 @@ public class Matrix4fAdapter implements JsonDeserializer<Matrix4f> {
 
     @Override
     public Matrix4f deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        JsonArray transformationArray = json.getAsJsonObject().getAsJsonArray("transforms");
+        JsonArray transformationArray = json.getAsJsonArray();
 
         return new Matrix4f(
                 getFloat(transformationArray, 0), getFloat(transformationArray, 4), getFloat(transformationArray, 8), getFloat(transformationArray, 12),

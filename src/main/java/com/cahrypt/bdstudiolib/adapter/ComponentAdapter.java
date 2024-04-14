@@ -12,6 +12,6 @@ public interface ComponentAdapter<T extends BDComponent<?>> extends JsonDeserial
     }
 
     default Matrix4f deserializeTransforms(JsonObject jsonObject, JsonDeserializationContext context) {
-        return context.deserialize(jsonObject.getAsJsonObject("transforms"), Matrix4f.class);
+        return context.deserialize(jsonObject.getAsJsonArray("transforms"), Matrix4f.class);
     }
 }
