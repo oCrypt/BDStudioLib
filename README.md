@@ -1,6 +1,5 @@
 # Installation
 Visit the BDStudioLib [releases](https://github.com/oCrypt/BDStudioLib/releases) page and download the version specific to your Minecraft server version. This is a library, NOT a standalone server plugin.
-(NOTE: Currently only a 1.20.4 build is provided.)
 
 ## Adding BDStudioLib as a dependency to your plugin:
 
